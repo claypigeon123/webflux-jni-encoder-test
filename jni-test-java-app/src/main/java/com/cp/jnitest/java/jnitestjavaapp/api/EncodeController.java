@@ -19,12 +19,17 @@ public class EncodeController {
 
     private final EncodeService service;
 
-    @PostMapping
-    public Mono<EncodeResponse> encode(
-        @RequestPart Mono<FilePart> file
-    ) {
+    @PostMapping("/native")
+    public Mono<EncodeResponse> encodeNative(@RequestPart Mono<FilePart> file) {
         return file
-            .doOnNext(filePart -> log.info("Received request to encode new file: {}", filePart.filename()))
-            .flatMap(service::encode);
+            .doOnNext(filePart -> log.info("Received request to native encode new file: {}", filePart.filename()))
+            .flatMap(service::encodeNative);
+    }
+
+    @PostMapping("/java")
+    public Mono<EncodeResponse> encodeJava(@RequestPart Mono<FilePart> file) {
+        return file
+            .doOnNext(filePart -> log.info("Received request to java encode new file: {}", filePart.filename()))
+            .flatMap(service::encodeJava);
     }
 }

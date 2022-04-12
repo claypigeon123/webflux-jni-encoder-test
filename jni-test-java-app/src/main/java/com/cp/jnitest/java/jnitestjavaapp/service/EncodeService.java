@@ -2,26 +2,32 @@ package com.cp.jnitest.java.jnitestjavaapp.service;
 
 import com.cp.jnitest.java.jnitestjavaapp.jni.FileHolder;
 import com.cp.jnitest.java.jnitestjavaapp.model.response.EncodeResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.nio.ByteBuffer;
+import java.util.Base64;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
 @Service
 public class EncodeService {
-    private static final Logger log = LoggerFactory.getLogger(EncodeService.class);
 
-    public Mono<EncodeResponse> encode(FilePart file) {
+    public Mono<EncodeResponse> encodeNative(FilePart file) {
         return file.content()
             .map(this::mapToBytes)
             .reduce(byteArrayReducer)
-            .map(this::encode)
+            .map(this::encodeBytesNative)
+            .map(bytes -> new EncodeResponse(UUID.randomUUID().toString(), bytes));
+    }
+
+    public Mono<EncodeResponse> encodeJava(FilePart file) {
+        return file.content()
+            .map(this::mapToBytes)
+            .reduce(byteArrayReducer)
+            .map(this::encodeBytesJava)
             .map(bytes -> new EncodeResponse(UUID.randomUUID().toString(), bytes));
     }
 
@@ -43,7 +49,7 @@ public class EncodeService {
         return combined;
     };
 
-    private byte[] encode(byte[] rawBytes) {
+    private byte[] encodeBytesNative(byte[] rawBytes) {
         try (FileHolder fileHolder = new FileHolder(rawBytes)) {
             int size = (int) fileHolder.getEncodedSize();
             ByteBuffer buffer = ByteBuffer.allocateDirect(size);
@@ -56,5 +62,9 @@ public class EncodeService {
 
             return encoded;
         }
+    }
+
+    private byte[] encodeBytesJava(byte[] rawBytes) {
+        return Base64.getEncoder().encode(rawBytes);
     }
 }
