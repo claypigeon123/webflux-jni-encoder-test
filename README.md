@@ -17,8 +17,8 @@ The app exposes two endpoints:
 
 ### jni-test-native
 
-The c++ side of things. Builds to a `.dll` file which is loaded by the Spring app.
+The c++ side of things. Builds to a `.dll` / `.so` file which is loaded by the Spring app.
 
 ### lib
 
-A pre-built `.dll` file of the native code for convenience.
+A pre-built `.dll` / `.so` file of the native code for convenience.
