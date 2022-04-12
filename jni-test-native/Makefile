@@ -2,8 +2,7 @@ jni-test-native: com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI.cpp check-env
 	g++ -fPIC -shared \
 	-I"${JAVA_HOME}/include/" \
 	-I"${JAVA_HOME}/include/linux/" \
-	-I"./cbase64.h" \
-	-I"./com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI.h" \
+	-I"./" \
 	-o ../lib/jni-test-native.so com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI.cpp
 
 check-env:
