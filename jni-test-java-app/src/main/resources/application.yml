@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: jni-test-java-app
+  main:
+    web-application-type: reactive
+    allow-bean-definition-overriding: true
+server:
+  port: 9000
