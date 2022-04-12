@@ -15,15 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="EncoderJNI.h">
+    <ClInclude Include="com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Base64.h">
+    <ClInclude Include="cbase64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="EncoderJNI.cpp">
+    <ClCompile Include="com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

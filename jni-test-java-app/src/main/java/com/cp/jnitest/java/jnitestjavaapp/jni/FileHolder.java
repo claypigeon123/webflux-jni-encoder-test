@@ -20,7 +20,7 @@ public class FileHolder implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (cPtr != 0) {
             EncoderJNI.delete_FileHolder(cPtr);
             cPtr = 0;

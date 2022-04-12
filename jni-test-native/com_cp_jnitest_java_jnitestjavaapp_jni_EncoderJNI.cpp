@@ -1,15 +1,23 @@
-#include "EncoderJNI.h"
+#include "com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI.h"
+#include <string>
+#define CBASE64_IMPLEMENTATION
+#include "cbase64.h"
+
+struct FileHolder {
+	char* encoded_bytes;
+	size_t length;
+};
 
 JNIEXPORT jlong JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_new_1FileHolder(JNIEnv* jenv, jclass jcls, jbyteArray byte_array) {
-	jbyte* raw_bytes = jenv->GetByteArrayElements(byte_array, NULL);
+	/*jbyte* raw_bytes = jenv->GetByteArrayElements(byte_array, NULL);
 	jsize size = jenv->GetArrayLength(byte_array);
 
-	std::string raw_bytes_string = "";
+	std::string raw_bytes_string;
 
-	jbyte* raw_bytes_iterator = raw_bytes;
+	char* raw_bytes_iterator = (char*) raw_bytes;
 	for (int i = 0; i < size; i++) {
-		const unsigned char* value_ptr = (const unsigned char*) raw_bytes_iterator;
-		raw_bytes_string.append((const char*) *value_ptr);
+		char* value_ptr = raw_bytes_iterator;
+		raw_bytes_string.append(value_ptr);
 		raw_bytes_iterator++;
 	}
 
@@ -19,15 +27,43 @@ JNIEXPORT jlong JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_n
 	char* encoded_bytes_start_ptr = new char[encoded_string.length() + 1];
 	std::copy(encoded_string.begin(), encoded_string.end(), encoded_bytes_start_ptr);
 
-	FileHolder file_holder = { encoded_bytes_start_ptr, encoded_string.length() + 1 };
+	FileHolder* file_holder = new FileHolder();
+	file_holder->encoded_bytes = encoded_bytes_start_ptr;
+	file_holder->length = encoded_string.length() + 1;
 
-	return (jlong) &file_holder;
+	return (jlong) file_holder;*/
+	jsize j_length = jenv->GetArrayLength(byte_array);
+	jbyte* j_bytes = jenv->GetByteArrayElements(byte_array, NULL);
+
+	/*char* bytes = new char[(size_t)j_length + 1];
+
+	memcpy(bytes, j_bytes, j_length);
+	bytes[j_length] = 0;*/
+
+	const unsigned int encoded_length = cbase64_calc_encoded_length(j_length + 1);
+	char* encoded_out = (char*)malloc(encoded_length);
+	char* encoded_out_end = encoded_out;
+
+	cbase64_encodestate encode_state;
+	cbase64_init_encodestate(&encode_state);
+	encoded_out_end += cbase64_encode_block((unsigned char*)j_bytes,(int) j_length + 1, encoded_out_end, &encode_state);
+	encoded_out_end += cbase64_encode_blockend(encoded_out_end, &encode_state);
+
+	jenv->ReleaseByteArrayElements(byte_array, j_bytes, JNI_ABORT);
+
+	unsigned int final_length = (encoded_out_end - encoded_out);
+
+	FileHolder* file_holder = new FileHolder();
+	file_holder->encoded_bytes = encoded_out;
+	file_holder->length = final_length;
+
+	return (jlong) file_holder;
 }
 
 JNIEXPORT void JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_delete_1FileHolder(JNIEnv* jenv, jclass jcls, jlong ptr) {
 	FileHolder* file_holder = (FileHolder*) ptr;
 
-	delete file_holder->encoded_bytes;
+	free(file_holder->encoded_bytes);
 	delete file_holder;
 }
 

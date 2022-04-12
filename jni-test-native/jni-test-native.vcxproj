@@ -19,11 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Base64.h" />
-    <ClInclude Include="EncoderJNI.h" />
+    <ClInclude Include="cbase64.h" />
+    <ClInclude Include="com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="EncoderJNI.cpp" />
+    <ClCompile Include="com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
