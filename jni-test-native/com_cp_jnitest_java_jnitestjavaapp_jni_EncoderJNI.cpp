@@ -9,36 +9,8 @@ struct FileHolder {
 };
 
 JNIEXPORT jlong JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_new_1FileHolder(JNIEnv* jenv, jclass jcls, jbyteArray byte_array) {
-	/*jbyte* raw_bytes = jenv->GetByteArrayElements(byte_array, NULL);
-	jsize size = jenv->GetArrayLength(byte_array);
-
-	std::string raw_bytes_string;
-
-	char* raw_bytes_iterator = (char*) raw_bytes;
-	for (int i = 0; i < size; i++) {
-		char* value_ptr = raw_bytes_iterator;
-		raw_bytes_string.append(value_ptr);
-		raw_bytes_iterator++;
-	}
-
-	jenv->ReleaseByteArrayElements(byte_array, raw_bytes, 0);
-
-	std::string encoded_string = base64.Encode(raw_bytes_string);
-	char* encoded_bytes_start_ptr = new char[encoded_string.length() + 1];
-	std::copy(encoded_string.begin(), encoded_string.end(), encoded_bytes_start_ptr);
-
-	FileHolder* file_holder = new FileHolder();
-	file_holder->encoded_bytes = encoded_bytes_start_ptr;
-	file_holder->length = encoded_string.length() + 1;
-
-	return (jlong) file_holder;*/
 	jsize j_length = jenv->GetArrayLength(byte_array);
 	jbyte* j_bytes = jenv->GetByteArrayElements(byte_array, NULL);
-
-	/*char* bytes = new char[(size_t)j_length + 1];
-
-	memcpy(bytes, j_bytes, j_length);
-	bytes[j_length] = 0;*/
 
 	const unsigned int encoded_length = cbase64_calc_encoded_length(j_length + 1);
 	char* encoded_out = (char*)malloc(encoded_length);
@@ -76,10 +48,9 @@ JNIEXPORT jlong JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_F
 JNIEXPORT void JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_FileHolder_1write(JNIEnv* jenv, jclass jcls, jlong ptr, jobject byte_buffer) {
 	FileHolder* file_holder = (FileHolder*)ptr;
 
-	jbyte* encoded_bytes = (jbyte*) file_holder->encoded_bytes;
 	jbyteArray encoded_bytes_array = jenv->NewByteArray((jsize)file_holder->length);
 
-	jenv->SetByteArrayRegion(encoded_bytes_array, 0, jenv->GetArrayLength(encoded_bytes_array), encoded_bytes);
+	jenv->SetByteArrayRegion(encoded_bytes_array, 0, jenv->GetArrayLength(encoded_bytes_array), (jbyte*)file_holder->encoded_bytes);
 
 	jbyte* buffer = (jbyte*) jenv->GetDirectBufferAddress(byte_buffer);
 	jenv->GetByteArrayRegion(encoded_bytes_array, 0, jenv->GetArrayLength(encoded_bytes_array), buffer);
