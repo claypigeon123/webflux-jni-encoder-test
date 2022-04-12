@@ -2,6 +2,7 @@ package com.cp.jnitest.java.jnitestjavaapp.service;
 
 import com.cp.jnitest.java.jnitestjavaapp.jni.FileHolder;
 import com.cp.jnitest.java.jnitestjavaapp.model.response.EncodeResponse;
+import com.cp.jnitest.java.jnitestjavaapp.util.WrappedByteBuffer;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
@@ -50,10 +51,10 @@ public class EncodeService {
     };
 
     private byte[] encodeBytesNative(byte[] rawBytes) {
-        try (FileHolder fileHolder = new FileHolder(rawBytes)) {
-            int size = (int) fileHolder.getEncodedSize();
-            ByteBuffer buffer = ByteBuffer.allocateDirect(size);
-
+        try (FileHolder fileHolder = new FileHolder(rawBytes);
+             WrappedByteBuffer wrapper = WrappedByteBuffer.direct((int) fileHolder.getEncodedSize())
+        ) {
+            ByteBuffer buffer = wrapper.getBuffer();
             fileHolder.write(buffer);
 
             buffer.rewind();
