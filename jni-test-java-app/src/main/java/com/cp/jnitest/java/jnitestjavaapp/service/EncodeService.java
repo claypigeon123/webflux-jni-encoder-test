@@ -51,10 +51,11 @@ public class EncodeService {
     };
 
     private byte[] encodeBytesNative(byte[] rawBytes) {
-        try (FileHolder fileHolder = new FileHolder(rawBytes);
-             WrappedByteBuffer wrapper = WrappedByteBuffer.direct((int) fileHolder.getEncodedSize())
+        try (
+            FileHolder fileHolder = new FileHolder(rawBytes);
+            WrappedByteBuffer wrapper = WrappedByteBuffer.direct((int) fileHolder.getEncodedSize())
         ) {
-            ByteBuffer buffer = wrapper.getBuffer();
+            ByteBuffer buffer = wrapper.buffer();
             fileHolder.write(buffer);
 
             buffer.rewind();

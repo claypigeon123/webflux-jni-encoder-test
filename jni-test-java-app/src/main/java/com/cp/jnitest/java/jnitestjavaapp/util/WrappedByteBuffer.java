@@ -1,12 +1,11 @@
 package com.cp.jnitest.java.jnitestjavaapp.util;
 
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 import java.nio.ByteBuffer;
 
-@Data
+@ToString
+@EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class WrappedByteBuffer implements AutoCloseable {
     private final ByteBuffer buffer;
@@ -17,6 +16,10 @@ public class WrappedByteBuffer implements AutoCloseable {
 
     public static WrappedByteBuffer heap(int size) {
         return new WrappedByteBuffer(ByteBuffer.allocate(size));
+    }
+
+    public ByteBuffer buffer() {
+        return buffer;
     }
 
     @Override
