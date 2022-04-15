@@ -3,18 +3,18 @@
 #include <string>
 
 namespace cp {
-	typedef unsigned char uchar;
+    typedef unsigned char uchar;
 
     struct encode_holder {
         char* encoded_bytes;
         size_t length;
     };
 
-	static const std::string b = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    static const std::string b = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     // ---
 
-	static cp::encode_holder* base64_encode(char* plain_bytes, size_t plain_length) {
+    static cp::encode_holder* base64_encode(char* plain_bytes, size_t plain_length) {
         std::string plain_str(plain_bytes, plain_length);
         std::string encoded_str;
 
@@ -39,7 +39,7 @@ namespace cp {
         }
 
         return encode_holder;
-	}
+    }
 
     static void free_encode_holder(cp::encode_holder* encode_holder) {
         delete[] encode_holder->encoded_bytes;
