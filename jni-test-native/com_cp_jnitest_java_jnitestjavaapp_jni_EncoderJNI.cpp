@@ -3,10 +3,12 @@
 #define CBASE64_IMPLEMENTATION
 #include "cbase64.h"
 
-struct FileHolder {
-	char* encoded_bytes;
-	size_t length;
-};
+namespace cp {
+	struct file_holder {
+		char* encoded_bytes;
+		size_t length;
+	};
+}
 
 JNIEXPORT jlong JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_new_1FileHolder(JNIEnv* jenv, jclass jcls, jbyteArray byte_array) {
 	jsize j_length = jenv->GetArrayLength(byte_array);
@@ -18,14 +20,14 @@ JNIEXPORT jlong JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_n
 
 	cbase64_encodestate encode_state;
 	cbase64_init_encodestate(&encode_state);
-	encoded_out_end += cbase64_encode_block((unsigned char*)j_bytes,(int) j_length + 1, encoded_out_end, &encode_state);
+	encoded_out_end += cbase64_encode_block((unsigned char*)j_bytes,(uint64_t) j_length + 1, encoded_out_end, &encode_state);
 	encoded_out_end += cbase64_encode_blockend(encoded_out_end, &encode_state);
 
 	jenv->ReleaseByteArrayElements(byte_array, j_bytes, JNI_ABORT);
 
-	unsigned int final_length = (encoded_out_end - encoded_out);
+	size_t final_length = (encoded_out_end - encoded_out);
 
-	FileHolder* file_holder = new FileHolder();
+	cp::file_holder* file_holder = new cp::file_holder();
 	file_holder->encoded_bytes = encoded_out;
 	file_holder->length = final_length;
 
@@ -33,20 +35,20 @@ JNIEXPORT jlong JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_n
 }
 
 JNIEXPORT void JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_delete_1FileHolder(JNIEnv* jenv, jclass jcls, jlong ptr) {
-	FileHolder* file_holder = (FileHolder*) ptr;
+	cp::file_holder* file_holder = (cp::file_holder*) ptr;
 
 	free(file_holder->encoded_bytes);
 	delete file_holder;
 }
 
 JNIEXPORT jlong JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_FileHolder_1encoded_1size(JNIEnv* jenv, jclass jcls, jlong ptr) {
-	FileHolder* file_holder = (FileHolder*)ptr;
+	cp::file_holder* file_holder = (cp::file_holder*)ptr;
 
 	return file_holder->length;
 }
 
 JNIEXPORT void JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_FileHolder_1write(JNIEnv* jenv, jclass jcls, jlong ptr, jobject byte_buffer) {
-	FileHolder* file_holder = (FileHolder*)ptr;
+	cp::file_holder* file_holder = (cp::file_holder*)ptr;
 
 	jbyteArray encoded_bytes_array = jenv->NewByteArray((jsize)file_holder->length);
 
