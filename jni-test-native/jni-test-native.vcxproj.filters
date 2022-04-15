@@ -18,7 +18,7 @@
     <ClInclude Include="com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cbase64.h">
+    <ClInclude Include="base64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
