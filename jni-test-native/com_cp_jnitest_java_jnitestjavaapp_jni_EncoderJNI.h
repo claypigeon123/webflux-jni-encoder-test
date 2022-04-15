@@ -7,37 +7,37 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	/*
-	 * Class:     com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI
-	 * Method:    new_FileHolder
-	 * Signature: ([B)J
-	 */
-	JNIEXPORT jlong JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_new_1FileHolder
-	(JNIEnv*, jclass, jbyteArray);
+    /*
+     * Class:     com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI
+     * Method:    new_FileHolder
+     * Signature: ([B)J
+     */
+    JNIEXPORT jlong JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_new_1FileHolder
+    (JNIEnv*, jclass, jbyteArray);
 
-	/*
-	 * Class:     com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI
-	 * Method:    delete_FileHolder
-	 * Signature: (J)V
-	 */
-	JNIEXPORT void JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_delete_1FileHolder
-	(JNIEnv*, jclass, jlong);
+    /*
+     * Class:     com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI
+     * Method:    delete_FileHolder
+     * Signature: (J)V
+     */
+    JNIEXPORT void JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_delete_1FileHolder
+    (JNIEnv*, jclass, jlong);
 
-	/*
-	 * Class:     com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI
-	 * Method:    FileHolder_encoded_size
-	 * Signature: (J)J
-	 */
-	JNIEXPORT jlong JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_FileHolder_1encoded_1size
-	(JNIEnv*, jclass, jlong);
+    /*
+     * Class:     com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI
+     * Method:    FileHolder_encoded_size
+     * Signature: (J)J
+     */
+    JNIEXPORT jlong JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_FileHolder_1encoded_1size
+    (JNIEnv*, jclass, jlong);
 
-	/*
-	 * Class:     com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI
-	 * Method:    FileHolder_write
-	 * Signature: (JLjava/nio/ByteBuffer;)V
-	 */
-	JNIEXPORT void JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_FileHolder_1write
-	(JNIEnv*, jclass, jlong, jobject);
+    /*
+     * Class:     com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI
+     * Method:    FileHolder_write
+     * Signature: (JLjava/nio/ByteBuffer;)V
+     */
+    JNIEXPORT void JNICALL Java_com_cp_jnitest_java_jnitestjavaapp_jni_EncoderJNI_FileHolder_1write
+    (JNIEnv*, jclass, jlong, jobject);
 
 #ifdef __cplusplus
 }
