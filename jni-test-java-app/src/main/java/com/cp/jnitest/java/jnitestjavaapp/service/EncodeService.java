@@ -1,34 +1,34 @@
 package com.cp.jnitest.java.jnitestjavaapp.service;
 
-import com.cp.jnitest.java.jnitestjavaapp.jni.FileHolder;
 import com.cp.jnitest.java.jnitestjavaapp.model.response.EncodeResponse;
-import com.cp.jnitest.java.jnitestjavaapp.util.WrappedByteBuffer;
+import com.cp.jnitest.java.jnitestjavaapp.util.encoder.Base64Encoder;
+import com.cp.jnitest.java.jnitestjavaapp.util.encoder.EncoderImplType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.nio.ByteBuffer;
-import java.util.Base64;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
 @Service
 public class EncodeService {
 
-    public Mono<EncodeResponse> encodeNative(FilePart file) {
-        return file.content()
-            .map(this::mapToBytes)
-            .reduce(byteArrayReducer)
-            .map(this::encodeBytesNative)
-            .map(bytes -> new EncodeResponse(UUID.randomUUID().toString(), bytes));
+    private final Map<EncoderImplType, Base64Encoder> encoderMap;
+
+    public EncodeService(Collection<Base64Encoder> encoders) {
+        encoderMap = new HashMap<>();
+        encoders.forEach(encoder -> encoderMap.put(encoder.getType(), encoder));
     }
 
-    public Mono<EncodeResponse> encodeJava(FilePart file) {
+    public Mono<EncodeResponse> encode(FilePart file, EncoderImplType encoderImplType) {
         return file.content()
             .map(this::mapToBytes)
             .reduce(byteArrayReducer)
-            .map(this::encodeBytesJava)
+            .map(raw -> encoderMap.get(encoderImplType).encode(raw))
             .map(bytes -> new EncodeResponse(UUID.randomUUID().toString(), bytes));
     }
 
@@ -49,24 +49,4 @@ public class EncodeService {
         }
         return combined;
     };
-
-    private byte[] encodeBytesNative(byte[] rawBytes) {
-        try (
-            FileHolder fileHolder = new FileHolder(rawBytes);
-            WrappedByteBuffer wrapper = WrappedByteBuffer.direct((int) fileHolder.getEncodedSize())
-        ) {
-            ByteBuffer buffer = wrapper.buffer();
-            fileHolder.write(buffer);
-
-            buffer.rewind();
-            byte[] encoded = new byte[buffer.remaining()];
-            buffer.get(encoded);
-
-            return encoded;
-        }
-    }
-
-    private byte[] encodeBytesJava(byte[] rawBytes) {
-        return Base64.getEncoder().encode(rawBytes);
-    }
 }

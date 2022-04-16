@@ -47,7 +47,7 @@ class EncodeControllerTest extends Specification {
             .build()
     }
 
-    def "valid request - encode native"() {
+    def "valid request - encoding #uri"() {
         given:
         def builder = new MultipartBodyBuilder()
         builder.part(ENCODE_MULTIPART_FILE_KEY, resourceLoader.getResource(PLAIN_IMAGE))
@@ -55,7 +55,7 @@ class EncodeControllerTest extends Specification {
 
         when:
         def result = webClient.post()
-            .uri(PATH_ENCODE_NATIVE)
+            .uri(uri)
             .body(BodyInserters.fromMultipartData(parts))
             .exchange()
             .returnResult(EncodeResponse.class)
@@ -63,31 +63,40 @@ class EncodeControllerTest extends Specification {
         then:
         result.getStatus() == HttpStatus.OK
         new String(result.getResponseBody().blockFirst().getEncodedBytes()) == new String(resourceLoader.getResource(ENCODED_IMAGE).getInputStream().readAllBytes())
+
+        where:
+        uri                || _
+        PATH_ENCODE_NATIVE || _
+        PATH_ENCODE_JAVA   || _
     }
 
-    def "valid request - encode java"() {
-        given:
-        def builder = new MultipartBodyBuilder()
-        builder.part(ENCODE_MULTIPART_FILE_KEY, resourceLoader.getResource(PLAIN_IMAGE))
-        def parts = builder.build()
-
-        when:
-        def result = webClient.post()
-            .uri(PATH_ENCODE_JAVA)
-            .body(BodyInserters.fromMultipartData(parts))
-            .exchange()
-            .returnResult(EncodeResponse.class)
-
-        then:
-        result.getStatus() == HttpStatus.OK
-        new String(result.getResponseBody().blockFirst().getEncodedBytes()) == new String(resourceLoader.getResource(ENCODED_IMAGE).getInputStream().readAllBytes())
-    }
-
-    def "invalid request - no file"() {
+    def "invalid request - json body #uri"() {
         when:
         def result = webClient.post()
             .uri(uri)
             .bodyValue("{ \"something\": \"spicy\" }")
+            .exchange()
+            .returnResult(Void.class)
+
+        then:
+        result.getStatus() == HttpStatus.UNSUPPORTED_MEDIA_TYPE
+
+        where:
+        uri                || _
+        PATH_ENCODE_NATIVE || _
+        PATH_ENCODE_JAVA   || _
+    }
+
+    def "invalid request - not a file part #uri"() {
+        given:
+        def builder = new MultipartBodyBuilder()
+        builder.part("file", "Well, this is actually a string")
+        def parts = builder.build()
+
+        when:
+        def result = webClient.post()
+            .uri(uri)
+            .body(BodyInserters.fromMultipartData(parts))
             .exchange()
             .returnResult(Void.class)
 

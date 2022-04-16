@@ -1,88 +1,50 @@
 package com.cp.jnitest.java.jnitestjavaapp.service
 
-import lombok.RequiredArgsConstructor
+import com.cp.jnitest.java.jnitestjavaapp.util.encoder.Base64Encoder
+import com.cp.jnitest.java.jnitestjavaapp.util.encoder.EncoderImplType
+import com.cp.jnitest.java.jnitestjavaapp.util.encoder.impl.JavaBase64Encoder
+import com.cp.jnitest.java.jnitestjavaapp.util.encoder.impl.NativeBase64Encoder
 import org.springframework.core.io.ByteArrayResource
-import org.springframework.core.io.buffer.DataBuffer
-import org.springframework.core.io.buffer.DataBufferFactory
 import org.springframework.core.io.buffer.DataBufferUtils
 import org.springframework.core.io.buffer.DefaultDataBufferFactory
-import org.springframework.http.HttpHeaders
 import org.springframework.http.codec.multipart.FilePart
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 import spock.lang.Specification
 
-import java.nio.file.Path
-
 class EncodeServiceTest extends Specification {
-
-    private static class MockFilePart implements FilePart {
-        private static final DataBufferFactory DATA_BUFFER_FACTORY = new DefaultDataBufferFactory()
-        private final byte[] content
-
-        MockFilePart(byte[] content) { this.content = content }
-
-        @Override
-        String filename() { return "mock-value" }
-
-        @Override
-        Mono<Void> transferTo(Path dest) { return Mono.empty() }
-
-        @Override
-        String name() { return "mock-key" }
-
-        @Override
-        HttpHeaders headers() { return HttpHeaders.EMPTY }
-
-        @Override
-        Flux<DataBuffer> content() {
-            return DataBufferUtils.read(new ByteArrayResource(content), DATA_BUFFER_FACTORY, 1024)
-        }
-    }
 
     EncodeService encodeService
 
     void setup() {
-        encodeService = new EncodeService()
+        Collection<Base64Encoder> encoders = new ArrayList<>()
+        encoders.addAll(new NativeBase64Encoder(), new JavaBase64Encoder())
+        encodeService = new EncodeService(encoders)
     }
 
-    def "encode natively"() {
-        given:
-        def part = new MockFilePart(bytes.getBytes())
+    def "encode \"#bytes\" with #method method returns \"#expected\""() {
+        given: "an uploaded file part"
+        def part = Mock(FilePart)
 
-        when:
-        def result = encodeService.encodeNative(part).block()
+        when: "EncodeService is called to encode the file part with the given method"
+        def result = encodeService.encode(part, method).block()
 
-        then:
+        then: "the resulting base64 encoded bytes match the expected encoded bytes"
+        1 * part.content() >> DataBufferUtils.read(new ByteArrayResource(bytes.getBytes()), new DefaultDataBufferFactory(), 1024)
+
         new String(result.getEncodedBytes()) == expected
 
         where:
-        bytes    || expected
-        "f"      || "Zg=="
-        "fo"     || "Zm8="
-        "foo"    || "Zm9v"
-        "foob"   || "Zm9vYg=="
-        "fooba"  || "Zm9vYmE="
-        "foobar" || "Zm9vYmFy"
-    }
-
-    def "encode with java"() {
-        given:
-        def part = new MockFilePart(bytes.getBytes())
-
-        when:
-        def result = encodeService.encodeJava(part).block()
-
-        then:
-        new String(result.getEncodedBytes()) == expected
-
-        where:
-        bytes    || expected
-        "f"      || "Zg=="
-        "fo"     || "Zm8="
-        "foo"    || "Zm9v"
-        "foob"   || "Zm9vYg=="
-        "fooba"  || "Zm9vYmE="
-        "foobar" || "Zm9vYmFy"
+        method                 | bytes    || expected
+        EncoderImplType.NATIVE | "f"      || "Zg=="
+        EncoderImplType.NATIVE | "fo"     || "Zm8="
+        EncoderImplType.NATIVE | "foo"    || "Zm9v"
+        EncoderImplType.NATIVE | "foob"   || "Zm9vYg=="
+        EncoderImplType.NATIVE | "fooba"  || "Zm9vYmE="
+        EncoderImplType.NATIVE | "foobar" || "Zm9vYmFy"
+        EncoderImplType.JAVA   | "f"      || "Zg=="
+        EncoderImplType.JAVA   | "fo"     || "Zm8="
+        EncoderImplType.JAVA   | "foo"    || "Zm9v"
+        EncoderImplType.JAVA   | "foob"   || "Zm9vYg=="
+        EncoderImplType.JAVA   | "fooba"  || "Zm9vYmE="
+        EncoderImplType.JAVA   | "foobar" || "Zm9vYmFy"
     }
 }
