@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/encode")
+@RequestMapping(value = "/api/v1/encode", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 public class EncodeController {
     private static final Logger log = LoggerFactory.getLogger(EncodeController.class);
 
@@ -30,14 +30,14 @@ public class EncodeController {
     }
     // ------------------------------------------------------------------
 
-    @PostMapping(value = "/native", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping("/native")
     public Mono<EncodeResponse> encodeNative(@RequestPart Mono<FilePart> file) {
         return file
             .doOnNext(filePart -> log.info("Received request to native encode new file: {}", filePart.filename()))
             .flatMap(filePart -> service.encode(filePart, EncoderImplType.NATIVE));
     }
 
-    @PostMapping(value = "/java", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping("/java")
     public Mono<EncodeResponse> encodeJava(@RequestPart Mono<FilePart> file) {
         return file
             .doOnNext(filePart -> log.info("Received request to java encode new file: {}", filePart.filename()))

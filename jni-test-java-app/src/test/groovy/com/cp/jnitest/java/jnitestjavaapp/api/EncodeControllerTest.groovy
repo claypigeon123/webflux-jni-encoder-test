@@ -16,8 +16,9 @@ import spock.lang.Specification
 class EncodeControllerTest extends Specification {
 
     // rest api paths
-    private static final String PATH_ENCODE_NATIVE = "/api/v1/encode/native"
-    private static final String PATH_ENCODE_JAVA = "/api/v1/encode/java"
+    private static final String ENCODE_API_PREFIX = "/api/v1/encode"
+    private static final String PATH_ENCODE_NATIVE = "$ENCODE_API_PREFIX/native"
+    private static final String PATH_ENCODE_JAVA = "$ENCODE_API_PREFIX/java"
 
     // request constant
     private static final String ENCODE_MULTIPART_FILE_KEY = "file"
