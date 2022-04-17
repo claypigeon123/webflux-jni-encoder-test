@@ -8,11 +8,7 @@ import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.BiFunction;
+import java.util.*;
 
 @Service
 public class EncodeService {
@@ -26,27 +22,25 @@ public class EncodeService {
 
     public Mono<EncodeResponse> encode(FilePart file, EncoderImplType encoderImplType) {
         return file.content()
-            .map(this::mapToBytes)
-            .reduce(byteArrayReducer)
+            .map(this::dataBufferToBytes)
+            .reduce(this::combineBytes)
             .map(raw -> encoderMap.get(encoderImplType).encode(raw))
             .map(bytes -> new EncodeResponse(UUID.randomUUID().toString(), bytes));
     }
 
     // --
 
-    private byte[] mapToBytes(DataBuffer dataBuffer) {
+    private byte[] dataBufferToBytes(DataBuffer dataBuffer) {
         byte[] bytes = new byte[dataBuffer.readableByteCount()];
-        for (int i = 0; i < bytes.length; i++) {
-            bytes[i] = dataBuffer.read();
-        }
+        dataBuffer.read(bytes);
         return bytes;
     }
 
-    private final BiFunction<byte[], byte[], byte[]> byteArrayReducer = (a, b) -> {
+    private byte[] combineBytes(byte[] a, byte[] b) {
         byte[] combined = new byte[a.length + b.length];
         for (int i = 0; i < combined.length; i++) {
             combined[i] = i < a.length ? a[i] : b[i - a.length];
         }
         return combined;
-    };
+    }
 }
