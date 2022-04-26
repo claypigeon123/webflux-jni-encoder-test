@@ -10,6 +10,8 @@ import org.springframework.core.io.buffer.DefaultDataBufferFactory
 import org.springframework.http.codec.multipart.FilePart
 import spock.lang.Specification
 
+import java.util.stream.Collectors
+
 class EncodeServiceTest extends Specification {
 
     EncodeService encodeService
@@ -20,31 +22,27 @@ class EncodeServiceTest extends Specification {
         encodeService = new EncodeService(encoders)
     }
 
-    def "encode \"#bytes\" with #method method returns \"#expected\""() {
+    void "encoding #bytes returns #expected with all encoder types"() {
         given: "an uploaded file part"
         def part = Mock(FilePart)
 
         when: "EncodeService is called to encode the file part with the given method"
-        def result = encodeService.encode(part, method).block()
+        def results = Arrays.stream(EncoderImplType.values())
+            .map(type -> encodeService.encode(part, type).block())
+            .collect(Collectors.toList())
 
         then: "the resulting base64 encoded bytes match the expected encoded bytes"
-        1 * part.content() >> DataBufferUtils.read(new ByteArrayResource(bytes.getBytes()), new DefaultDataBufferFactory(), 1024)
+        _ * part.content() >> DataBufferUtils.read(new ByteArrayResource(bytes.getBytes()), new DefaultDataBufferFactory(), 1024)
 
-        new String(result.getEncodedBytes()) == expected
+        results.findAll {  new String(it.getEncodedBytes()) != expected }.isEmpty()
 
         where:
-        method                 | bytes    || expected
-        EncoderImplType.NATIVE | "f"      || "Zg=="
-        EncoderImplType.NATIVE | "fo"     || "Zm8="
-        EncoderImplType.NATIVE | "foo"    || "Zm9v"
-        EncoderImplType.NATIVE | "foob"   || "Zm9vYg=="
-        EncoderImplType.NATIVE | "fooba"  || "Zm9vYmE="
-        EncoderImplType.NATIVE | "foobar" || "Zm9vYmFy"
-        EncoderImplType.JAVA   | "f"      || "Zg=="
-        EncoderImplType.JAVA   | "fo"     || "Zm8="
-        EncoderImplType.JAVA   | "foo"    || "Zm9v"
-        EncoderImplType.JAVA   | "foob"   || "Zm9vYg=="
-        EncoderImplType.JAVA   | "fooba"  || "Zm9vYmE="
-        EncoderImplType.JAVA   | "foobar" || "Zm9vYmFy"
+        bytes    || expected
+        "f"      || "Zg=="
+        "fo"     || "Zm8="
+        "foo"    || "Zm9v"
+        "foob"   || "Zm9vYg=="
+        "fooba"  || "Zm9vYmE="
+        "foobar" || "Zm9vYmFy"
     }
 }

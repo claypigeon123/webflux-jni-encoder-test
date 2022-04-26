@@ -1,5 +1,6 @@
 package com.cp.jnitest.java.jnitestjavaapp.service;
 
+import com.cp.jnitest.java.jnitestjavaapp.model.exception.NoEncoderImplementationFoundException;
 import com.cp.jnitest.java.jnitestjavaapp.model.response.EncodeResponse;
 import com.cp.jnitest.java.jnitestjavaapp.util.encoder.Base64Encoder;
 import com.cp.jnitest.java.jnitestjavaapp.util.encoder.EncoderImplType;
@@ -24,8 +25,12 @@ public class EncodeService {
         return file.content()
             .map(this::dataBufferToBytes)
             .reduce(this::combineBytes)
-            .map(raw -> encoderMap.get(encoderImplType).encode(raw))
-            .map(bytes -> new EncodeResponse(UUID.randomUUID().toString(), bytes));
+            .zipWith(Mono.defer(() -> encoderMap.containsKey(encoderImplType)
+                ? Mono.just(encoderMap.get(encoderImplType))
+                : Mono.error(new NoEncoderImplementationFoundException())
+            ))
+            .map(tuple2 -> tuple2.getT2().encode(tuple2.getT1()))
+            .map(bytes -> new EncodeResponse(UUID.randomUUID().toString(), encoderImplType, bytes));
     }
 
     // --

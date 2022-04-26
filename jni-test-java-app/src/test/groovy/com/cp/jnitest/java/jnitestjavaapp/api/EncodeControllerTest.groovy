@@ -1,12 +1,16 @@
 package com.cp.jnitest.java.jnitestjavaapp.api
 
 import com.cp.jnitest.java.jnitestjavaapp.model.response.EncodeResponse
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.core.io.ResourceLoader
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.client.MultipartBodyBuilder
+import org.springframework.http.codec.json.Jackson2JsonDecoder
+import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.ExchangeStrategies
@@ -32,6 +36,9 @@ class EncodeControllerTest extends Specification {
     @Autowired
     ResourceLoader resourceLoader
 
+    @Autowired
+    ObjectMapper objectMapper
+
     @LocalServerPort
     int port
 
@@ -44,6 +51,10 @@ class EncodeControllerTest extends Specification {
 
         webClient = WebTestClient.bindToServer()
             .baseUrl("http://localhost:$port")
+            .codecs(configurer -> {
+                configurer.defaultCodecs().jackson2JsonEncoder(new Jackson2JsonEncoder(objectMapper, MediaType.APPLICATION_JSON))
+                configurer.defaultCodecs().jackson2JsonDecoder(new Jackson2JsonDecoder(objectMapper, MediaType.APPLICATION_JSON))
+            })
             .exchangeStrategies(strategies)
             .build()
     }

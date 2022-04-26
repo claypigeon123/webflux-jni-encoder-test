@@ -1,14 +1,15 @@
 package com.cp.jnitest.java.jnitestjavaapp.api;
 
+import com.cp.jnitest.java.jnitestjavaapp.model.exception.InvalidPartInRequestException;
 import com.cp.jnitest.java.jnitestjavaapp.model.response.EncodeResponse;
 import com.cp.jnitest.java.jnitestjavaapp.service.EncodeService;
 import com.cp.jnitest.java.jnitestjavaapp.util.encoder.EncoderImplType;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
+import org.springframework.http.codec.multipart.Part;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -22,25 +23,19 @@ public class EncodeController {
 
     private final EncodeService service;
 
-    // Special case for when "file" key in a multipart is NOT a file part
-    @ExceptionHandler(ClassCastException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Mono<Void> handleClassCastException(ClassCastException e) {
-        return Mono.empty();
-    }
-    // ------------------------------------------------------------------
-
-    @PostMapping("/native")
-    public Mono<EncodeResponse> encodeNative(@RequestPart Mono<FilePart> file) {
-        return file
-            .doOnNext(filePart -> log.info("Received request to native encode new file: {}", filePart.filename()))
-            .flatMap(filePart -> service.encode(filePart, EncoderImplType.NATIVE));
+    @PostMapping("/{encoderType}")
+    public Mono<EncodeResponse> encodeNative(
+        @RequestPart("file") Mono<Part> part,
+        @PathVariable EncoderImplType encoderType
+    ) {
+        return part.flatMap(this::mapPartToFilePart)
+            .doOnNext(filePart -> log.info("Received request to {} encode new file: {}", encoderType.getDisplayName(), filePart.filename()))
+            .flatMap(filePart -> service.encode(filePart, encoderType));
     }
 
-    @PostMapping("/java")
-    public Mono<EncodeResponse> encodeJava(@RequestPart Mono<FilePart> file) {
-        return file
-            .doOnNext(filePart -> log.info("Received request to java encode new file: {}", filePart.filename()))
-            .flatMap(filePart -> service.encode(filePart, EncoderImplType.JAVA));
+    // --
+
+    private Mono<FilePart> mapPartToFilePart(Part part) {
+        return part instanceof FilePart fp ? Mono.just(fp) : Mono.error(new InvalidPartInRequestException());
     }
 }
